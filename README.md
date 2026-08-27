@@ -15,9 +15,9 @@
 | [`raw/`](raw/) | 调研输入、来源台账和受限捕获说明，不直接作为公开问答正文 |
 | [`archive/`](archive/) | 已弃用页面和历史材料 |
 | [`scripts/`](scripts/) | 构建、权威资格审计、来源检查和可复现迁移脚本 |
-| `integrations/llm-wiki-public/` | 本地只读问答派生服务；被 Git 忽略，不是知识真相源 |
+| `integrations/llm-wiki-public/` | 受 Git 管理的只读问答派生服务代码；运行态与密钥被忽略，不是知识真相源 |
 
-仓库提交可公开维护的知识页、治理规则、变更日志、来源台账和生成脚本。本地问答服务、第三方 WeKnora 工作树、生成索引、调研工作区，以及受限的原始网站文本捕获均不提交。
+仓库提交可公开维护的知识页、治理规则、变更日志、来源台账、生成脚本和公开问答集成代码。本地问答运行态与密钥、第三方 WeKnora 工作树、生成索引、调研工作区，以及受限的原始网站文本捕获均不提交。
 
 ## 快速开始
 
@@ -152,7 +152,7 @@ python3 -B scripts/audit_authority_readiness.py
   → 浏览器问答页面
 ```
 
-`integrations/llm-wiki-public/` 和 `services/` 是本地开发目录，默认被 Git 忽略；普通公开仓库副本可能不包含它们。如果当前工作区存在该集成，先阅读其 [`README.md`](integrations/llm-wiki-public/README.md)。Docker Compose 备用流程为：
+`integrations/llm-wiki-public/` 的集成代码受 Git 管理；其运行态、密钥以及 `services/` 下的第三方 WeKnora 工作树不提交。开始前先阅读其 [`README.md`](integrations/llm-wiki-public/README.md)。Docker Compose 备用流程为：
 
 > [!WARNING] 发布前置条件
 > 当前 51 页仍未获得真人签署，新 Markdown 与既有固定授权语料之间也存在预期漂移。在完成审核、重新生成语料并由发布负责人明确更新固定授权前，`manifest` 或 `publish` 应当失败；不要通过跳过 SHA、页数或审核门禁来强行发布。
@@ -160,11 +160,17 @@ python3 -B scripts/audit_authority_readiness.py
 ```bash
 cd integrations/llm-wiki-public
 ./manage.sh init
-# 编辑 .env，替换所有 CHANGE_ME，并设置模型地址与模型名
+# 编辑 .env，替换所有 CHANGE_ME，设置模型地址/模型名，并填写首个 system admin 邮箱
+set -a
+. ./.env
+set +a
 ./manage.sh manifest
+npm --prefix web ci
 ./manage.sh test
 ./manage.sh infra
+# 按集成 README 注册首个 Owner；注册邮箱必须匹配 .env 的 system admin 引导邮箱
 ./manage.sh reload-model
+# 等待 /health 就绪，再重新登录，确认 system admin/Tenant ID 后导出新的 Owner JWT
 ./manage.sh bootstrap
 ./manage.sh publish
 ./manage.sh check

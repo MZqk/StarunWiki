@@ -68,7 +68,7 @@ services:
       - PUBLIC_TRUSTED_PROXY_CIDRS=${PUBLIC_TRUSTED_PROXY_CIDRS:-172.16.0.0/12}
       - PUBLIC_DB_PATH=/data/public-bff/public-bff.db
       - WEKNORA_BASE_URL=${WEKNORA_BASE_URL:-http://app:8080}
-      - WEKNORA_TENANT_ID=${WEKNORA_TENANT_ID:-10000}
+      - WEKNORA_TENANT_ID=${WEKNORA_TENANT_ID:-1}
     volumes:
       - ../../integrations/llm-wiki-public/authorization/public-manifest.json:/app/public-manifest.json:ro
       - public-bff-sqlite-data:/data/public-bff
