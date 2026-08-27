@@ -1,0 +1,12 @@
+builtin_models:
+  - id: builtin-llm-wiki-chat
+    tenant_id: ${WEKNORA_TENANT_ID}
+    name: ${LLM_MODEL_NAME}
+    type: KnowledgeQA
+    source: remote
+    description: LLM Wiki 纯 Wiki 问答模型
+    is_default: true
+    status: active
+    parameters:
+      base_url: ${LLM_BASE_URL}
+      provider: ${LLM_PROVIDER}

@@ -1,0 +1,322 @@
+diff --git a/internal/application/repository/wiki_page.go b/internal/application/repository/wiki_page.go
+index b355647..277e0ea 100644
+--- a/internal/application/repository/wiki_page.go
++++ b/internal/application/repository/wiki_page.go
+@@ -6,5 +6,7 @@ import (
+ 	"errors"
+ 	"fmt"
++	"regexp"
++	"sort"
+ 	"strings"
+ 	"time"
+ 
+@@ -319,13 +321,23 @@ func (r *wikiPageRepository) List(ctx context.Context, req *types.WikiPageListRe
+ 	if req.Status != "" {
+ 		query = query.Where("status = ?", req.Status)
+ 	}
+ 	if req.Query != "" {
+-		// Use PostgreSQL full-text search + ILIKE for aliases
+-		query = query.Where(
+-			"(to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(content, '')) @@ plainto_tsquery('simple', ?) OR aliases::text ILIKE ?)",
+-			req.Query,
+-			"%"+req.Query+"%",
+-		)
++		if r.db.Dialector != nil && r.db.Dialector.Name() == "sqlite" {
++			// SQLite has no PostgreSQL FTS/ILIKE operators. This management-page
++			// filter is literal substring search, with LIKE metacharacters escaped.
++			like := "%" + escapeLikePattern(strings.ToLower(req.Query)) + "%"
++			query = query.Where(
++				"(LOWER(title) LIKE ? ESCAPE '\\' OR LOWER(content) LIKE ? ESCAPE '\\' OR LOWER(CAST(aliases AS TEXT)) LIKE ? ESCAPE '\\')",
++				like, like, like,
++			)
++		} else {
++			// Use PostgreSQL full-text search + ILIKE for aliases.
++			query = query.Where(
++				"(to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(content, '')) @@ plainto_tsquery('simple', ?) OR aliases::text ILIKE ?)",
++				req.Query,
++				"%"+req.Query+"%",
++			)
++		}
+ 	}
+ 	// Directory filters are pushed to SQL so the DB does the counting and
+ 	// pagination instead of loading every page of the type into memory. `depth`
+@@ -1157,6 +1170,9 @@ func (r *wikiPageRepository) Search(ctx context.Context, kbID string, query stri
+ 	if limit > 50 {
+ 		limit = 50
+ 	}
++	if r.db.Dialector != nil && r.db.Dialector.Name() == "sqlite" {
++		return r.searchSQLite(ctx, kbID, query, limit)
++	}
+ 
+ 	// CASE expression is evaluated per-row during SELECT; we order by the
+ 	// alias so the DB only computes the rank once. Parameterized four
+@@ -1183,6 +1200,61 @@ func (r *wikiPageRepository) Search(ctx context.Context, kbID string, query stri
+ 	return pages, nil
+ }
+ 
++// searchSQLite preserves wiki_search's case-insensitive regex contract without
++// relying on PostgreSQL's ~* operator. The public Wiki deployment is bounded to
++// a fixed 139-page corpus, so a RE2-backed in-process scan is deterministic and
++// avoids exposing SQLite to a custom regexp extension.
++func (r *wikiPageRepository) searchSQLite(ctx context.Context, kbID string, query string, limit int) ([]*types.WikiPage, error) {
++	pattern, err := regexp.Compile("(?i:" + query + ")")
++	if err != nil {
++		return nil, fmt.Errorf("invalid wiki search regular expression: %w", err)
++	}
++	var candidates []*types.WikiPage
++	if err := r.db.WithContext(ctx).
++		Where("knowledge_base_id = ? AND status != ?", kbID, types.WikiPageStatusArchived).
++		Find(&candidates).Error; err != nil {
++		return nil, err
++	}
++	type rankedPage struct {
++		page *types.WikiPage
++		rank int
++	}
++	ranked := make([]rankedPage, 0, len(candidates))
++	for _, page := range candidates {
++		rank := 0
++		switch {
++		case pattern.MatchString(page.Title):
++			rank = 4
++		case pattern.MatchString(page.Slug):
++			rank = 3
++		case pattern.MatchString(page.Summary):
++			rank = 2
++		case pattern.MatchString(page.Content):
++			rank = 1
++		}
++		if rank > 0 {
++			ranked = append(ranked, rankedPage{page: page, rank: rank})
++		}
++	}
++	sort.SliceStable(ranked, func(i, j int) bool {
++		if ranked[i].rank != ranked[j].rank {
++			return ranked[i].rank > ranked[j].rank
++		}
++		if !ranked[i].page.UpdatedAt.Equal(ranked[j].page.UpdatedAt) {
++			return ranked[i].page.UpdatedAt.After(ranked[j].page.UpdatedAt)
++		}
++		return ranked[i].page.Slug < ranked[j].page.Slug
++	})
++	if len(ranked) > limit {
++		ranked = ranked[:limit]
++	}
++	pages := make([]*types.WikiPage, len(ranked))
++	for index := range ranked {
++		pages[index] = ranked[index].page
++	}
++	return pages, nil
++}
++
+ // CountByType returns page counts grouped by type for a knowledge base
+ func (r *wikiPageRepository) CountByType(ctx context.Context, kbID string) (map[string]int64, error) {
+ 	type result struct {
+diff --git a/internal/agent/tools/wiki_tools.go b/internal/agent/tools/wiki_tools.go
+index 70878bb..35d7c68 100644
+--- a/internal/agent/tools/wiki_tools.go
++++ b/internal/agent/tools/wiki_tools.go
+@@ -758,7 +758,7 @@ func NewWikiSearchTool(
+ 	return &wikiSearchTool{
+ 		BaseTool: NewBaseTool(
+ 			ToolWikiSearch,
+-			`Search wiki pages using PostgreSQL POSIX regular expressions (~* operator, case-insensitive).
++			`Search wiki pages using case-insensitive regular expressions.
+ STRONGLY PREFER using regex to search for multiple concepts at once rather than simple plain text queries.
+ Returns matching pages with titles, slugs, and summaries (each tagged with its short bN knowledge_base_id).
+ Examples:
+diff --git a/internal/application/repository/wiki_page_test.go b/internal/application/repository/wiki_page_test.go
+index cb8e2ee..b8cac3a 100644
+--- a/internal/application/repository/wiki_page_test.go
++++ b/internal/application/repository/wiki_page_test.go
+@@ -594,3 +594,72 @@ func TestDeleteRevisionsByPageOnlyTouchesThatPage(t *testing.T) {
+ 	require.NoError(t, repo.DeleteRevisionsByPage(ctx, ""))
+ 	assert.Equal(t, int64(1), countWikiRevisions(t, db, bystander.ID))
+ }
++
++func TestSearchSQLiteRegexRankingIsolationAndLimit(t *testing.T) {
++	db := setupWikiPagesTestDB(t)
++	repo := NewWikiPageRepository(db)
++	ctx := context.Background()
++
++	titleHit := makeWikiPage("kb-search", "concept/title", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	titleHit.Title = "AI Agent 深空指南"
++	slugHit := makeWikiPage("kb-search", "concept/ai-agent-slug", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	slugHit.Title = "Slug"
++	summaryHit := makeWikiPage("kb-search", "concept/summary", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	summaryHit.Title = "Summary"
++	summaryHit.Summary = "AI Agent summary"
++	contentHit := makeWikiPage("kb-search", "concept/content", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	contentHit.Title = "Content"
++	contentHit.Summary = "none"
++	contentHit.Content = "AI Agent body"
++	archived := makeWikiPage("kb-search", "concept/archived", types.WikiPageTypeConcept, types.WikiPageStatusArchived)
++	archived.Title = "AI Agent archived"
++	otherKB := makeWikiPage("kb-other", "concept/other", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	otherKB.Title = "AI Agent other"
++	for _, page := range []*types.WikiPage{titleHit, slugHit, summaryHit, contentHit, archived, otherKB} {
++		require.NoError(t, repo.Create(ctx, page))
++	}
++
++	got, err := repo.Search(ctx, "kb-search", "ai[ -]agent|深空", 10)
++	require.NoError(t, err)
++	require.Len(t, got, 4)
++	assert.Equal(t, titleHit.Slug, got[0].Slug)
++	assert.Equal(t, slugHit.Slug, got[1].Slug)
++	assert.Equal(t, summaryHit.Slug, got[2].Slug)
++	assert.Equal(t, contentHit.Slug, got[3].Slug)
++
++	limited, err := repo.Search(ctx, "kb-search", "ai[ -]agent", 2)
++	require.NoError(t, err)
++	require.Len(t, limited, 2)
++	assert.Equal(t, titleHit.Slug, limited[0].Slug)
++	assert.Equal(t, slugHit.Slug, limited[1].Slug)
++}
++
++func TestSearchSQLiteRejectsInvalidRegex(t *testing.T) {
++	repo := NewWikiPageRepository(setupWikiPagesTestDB(t))
++	_, err := repo.Search(context.Background(), "kb", "[", 10)
++	require.Error(t, err)
++	assert.Contains(t, err.Error(), "invalid wiki search regular expression")
++}
++
++func TestListSQLiteEscapesLikeMetacharacters(t *testing.T) {
++	db := setupWikiPagesTestDB(t)
++	repo := NewWikiPageRepository(db)
++	ctx := context.Background()
++	literal := makeWikiPage("kb-list", "concept/literal", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	literal.Title = "100% calibration"
++	wildcardOnly := makeWikiPage("kb-list", "concept/other", types.WikiPageTypeConcept, types.WikiPageStatusPublished)
++	wildcardOnly.Title = "100X calibration"
++	require.NoError(t, repo.Create(ctx, literal))
++	require.NoError(t, repo.Create(ctx, wildcardOnly))
++
++	got, total, err := repo.List(ctx, &types.WikiPageListRequest{
++		KnowledgeBaseID: "kb-list",
++		Query:           "%",
++		Page:            1,
++		PageSize:        10,
++	})
++	require.NoError(t, err)
++	assert.Equal(t, int64(1), total)
++	require.Len(t, got, 1)
++	assert.Equal(t, literal.Slug, got[0].Slug)
++}
+diff --git a/internal/agent/tools/wiki_tools_test.go b/internal/agent/tools/wiki_tools_test.go
+index d883c2c..7142cac 100644
+--- a/internal/agent/tools/wiki_tools_test.go
++++ b/internal/agent/tools/wiki_tools_test.go
+@@ -371,6 +371,19 @@ func TestWikiSearchFailsWhenEveryAllowedBackendLookupFails(t *testing.T) {
+ 	}
+ }
+ 
++func TestWikiSearchDescriptionIsDatabaseNeutral(t *testing.T) {
++	tool := NewWikiSearchTool(
++		&fakeWikiPageService{}, nil, NewWikiScopesFromKBIDs([]string{"kb-1"}), NewWikiRouteResolver(),
++	)
++	description := tool.Description()
++	if strings.Contains(description, "PostgreSQL") || strings.Contains(description, "~*") {
++		t.Fatalf("wiki_search description leaked a database-specific contract: %s", description)
++	}
++	if !strings.Contains(description, "case-insensitive regular expressions") {
++		t.Fatalf("wiki_search description lost its regex contract: %s", description)
++	}
++}
++
+ func TestResolveUniqueWikiPageRejectsAmbiguousMutationTarget(t *testing.T) {
+ 	slug := "concept/shared"
+ 	service := &fakeWikiPageService{pages: map[string]*types.WikiPage{
+diff --git a/migrations/sqlite/000003_runtime_schema_parity.up.sql b/migrations/sqlite/000003_runtime_schema_parity.up.sql
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/migrations/sqlite/000003_runtime_schema_parity.up.sql
+@@ -0,0 +1,41 @@
++-- Bring the consolidated SQLite schema in line with runtime models added
++-- after the original Lite snapshot was created.
++
++ALTER TABLE tenants ADD COLUMN api_principal_config TEXT;
++
++ALTER TABLE users ADD COLUMN is_system_admin BOOLEAN NOT NULL DEFAULT 0;
++CREATE INDEX IF NOT EXISTS idx_users_is_system_admin ON users(is_system_admin);
++
++CREATE TABLE IF NOT EXISTS task_pending_ops (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    tenant_id INTEGER NOT NULL,
++    task_type VARCHAR(64) NOT NULL,
++    scope VARCHAR(32) NOT NULL,
++    scope_id VARCHAR(64) NOT NULL,
++    op VARCHAR(32) NOT NULL,
++    dedup_key VARCHAR(128) NOT NULL DEFAULT '',
++    payload TEXT NOT NULL DEFAULT '{}',
++    fail_count INTEGER NOT NULL DEFAULT 0,
++    enqueued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++    claimed_at DATETIME
++);
++CREATE INDEX IF NOT EXISTS idx_task_pending_ops_scope
++    ON task_pending_ops(task_type, scope, scope_id, id);
++CREATE INDEX IF NOT EXISTS idx_task_pending_ops_tenant
++    ON task_pending_ops(tenant_id);
++
++CREATE TABLE IF NOT EXISTS system_settings (
++    id INTEGER PRIMARY KEY AUTOINCREMENT,
++    key VARCHAR(128) NOT NULL UNIQUE,
++    value TEXT NOT NULL,
++    value_type VARCHAR(16) NOT NULL,
++    category VARCHAR(32) NOT NULL,
++    description TEXT NOT NULL DEFAULT '',
++    is_secret BOOLEAN NOT NULL DEFAULT 0,
++    requires_restart BOOLEAN NOT NULL DEFAULT 0,
++    last_modified_by VARCHAR(36) NOT NULL DEFAULT '',
++    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
++    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
++);
++CREATE INDEX IF NOT EXISTS idx_system_settings_category
++    ON system_settings(category);
+diff --git a/migrations/sqlite/000003_runtime_schema_parity.down.sql b/migrations/sqlite/000003_runtime_schema_parity.down.sql
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/migrations/sqlite/000003_runtime_schema_parity.down.sql
+@@ -0,0 +1,11 @@
++DROP INDEX IF EXISTS idx_system_settings_category;
++DROP TABLE IF EXISTS system_settings;
++
++DROP INDEX IF EXISTS idx_task_pending_ops_tenant;
++DROP INDEX IF EXISTS idx_task_pending_ops_scope;
++DROP TABLE IF EXISTS task_pending_ops;
++
++DROP INDEX IF EXISTS idx_users_is_system_admin;
++ALTER TABLE users DROP COLUMN is_system_admin;
++
++ALTER TABLE tenants DROP COLUMN api_principal_config;
+diff --git a/migrations/sqlite/000004_pending_subtasks_count.up.sql b/migrations/sqlite/000004_pending_subtasks_count.up.sql
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/migrations/sqlite/000004_pending_subtasks_count.up.sql
+@@ -0,0 +1,2 @@
++ALTER TABLE knowledges
++    ADD COLUMN pending_subtasks_count INTEGER NOT NULL DEFAULT 0;
+diff --git a/migrations/sqlite/000004_pending_subtasks_count.down.sql b/migrations/sqlite/000004_pending_subtasks_count.down.sql
+new file mode 100644
+index 0000000..4444444
+--- /dev/null
++++ b/migrations/sqlite/000004_pending_subtasks_count.down.sql
+@@ -0,0 +1 @@
++ALTER TABLE knowledges DROP COLUMN pending_subtasks_count;
+diff --git a/migrations/sqlite/000005_message_attachments.up.sql b/migrations/sqlite/000005_message_attachments.up.sql
+new file mode 100644
+index 0000000..5555555
+--- /dev/null
++++ b/migrations/sqlite/000005_message_attachments.up.sql
+@@ -0,0 +1,2 @@
++ALTER TABLE messages
++    ADD COLUMN attachments TEXT NOT NULL DEFAULT '[]';
+diff --git a/migrations/sqlite/000005_message_attachments.down.sql b/migrations/sqlite/000005_message_attachments.down.sql
+new file mode 100644
+index 0000000..6666666
+--- /dev/null
++++ b/migrations/sqlite/000005_message_attachments.down.sql
+@@ -0,0 +1 @@
++ALTER TABLE messages DROP COLUMN attachments;

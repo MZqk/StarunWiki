@@ -1,0 +1,11 @@
+[project]
+name = "llm-wiki-public"
+version = "0.1.0"
+description = "Immutable LLM Wiki publisher and anonymous public Q&A gateway"
+requires-python = ">=3.11"
+dependencies = [
+  "PyYAML==6.0.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

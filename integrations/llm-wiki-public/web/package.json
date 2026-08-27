@@ -1,0 +1,26 @@
+{
+  "name": "llm-wiki-public-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "test": "tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.11",
+    "marked": "^17.0.5",
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/jsdom": "^21.1.7",
+    "@vitejs/plugin-vue": "6.0.6",
+    "jsdom": "^26.1.0",
+    "tsx": "^4.23.1",
+    "typescript": "~6.0.3",
+    "vite": "^7.3.5",
+    "vue-tsc": "^3.2.8"
+  }
+}

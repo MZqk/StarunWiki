@@ -5,9 +5,10 @@
 __pycache__/
 *.py[cod]
 
-# Local-only public-Q&A runtime. It contains credentials, databases, backups,
-# dependencies, and generated output rather than canonical Wiki content.
-integrations/
+# The public Wiki Q&A implementation is source-controlled. Other integrations
+# remain local unless they are explicitly made part of this repository.
+/integrations/*
+!/integrations/llm-wiki-public/
 
 # Third-party WeKnora checkout and its local SQLite worktree.
 services/
