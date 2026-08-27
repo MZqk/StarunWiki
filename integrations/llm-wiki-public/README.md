@@ -54,29 +54,22 @@ Docker 模式会新增两个承载产品状态的 SQLite 命名卷：
 
 ## 前置依赖
 
-首次准备上游源码时，从仓库根目录执行：
-
-```bash
-git clone https://github.com/Tencent/WeKnora.git services/WeKnora
-git -C services/WeKnora checkout 3d5d8bfcdfeeea266b292b71cea616847af28d0f
-```
-
 需要准备：
 
-- Bash、ripgrep（`rg`）、`jq`，以及 `cp`、`chmod`、`mkdir`、`curl` 等常规命令；本机 overlay 还需要 `patch`、`shasum`、`awk` 和 `gofmt`。
+- Git、Bash、ripgrep（`rg`）、`jq`，以及 `cp`、`chmod`、`mkdir`、`curl` 等常规命令；首次 `init` 需要能访问 GitHub，本机 overlay 还需要 `patch`、`shasum`、`awk` 和 `gofmt`。
 - Python 3.11 或更高版本，以及 `uv`。
 - Docker Engine 和较新的 Docker Compose v2；Compose 必须支持 `!reset`、`!override` 和 `env_file.required`。
 - 执行完整测试或本机开发时，还需要 Go 1.26、Node.js `^20.19.0` 或 `>=22.12.0`，以及 npm。
 - 生成随机密钥建议使用 OpenSSL。
 
-本集成不复制上游 WeKnora 源码。准备好锁定版本后，再进入集成目录并启动一个 Bash 会话；本文后续 shell 片段均假定仍在这个目录和 Bash 会话中：
+从仓库根目录进入集成并启动一个 Bash 会话；本文后续 shell 片段均假定仍在这个目录和 Bash 会话中：
 
 ```bash
 cd integrations/llm-wiki-public
 bash
 ```
 
-`./manage.sh test` 会再次执行补丁可应用性检查。不要预先把本项目补丁直接应用到 `services/WeKnora` 工作树。
+`./manage.sh init` 会在缺少源码时自动克隆 WeKnora `v0.7.2`，并核对提交 `3d5d8bfcdfeeea266b292b71cea616847af28d0f`。`test` 会再次执行补丁可应用性检查。不要预先把本项目补丁直接应用到 `services/WeKnora` 工作树。
 
 ## `./manage.sh init` 详解
 
@@ -86,21 +79,34 @@ bash
 ./manage.sh init
 ```
 
-该命令只完成本地文件初始化：
+该命令完成本地配置和锁定依赖初始化：
 
 1. 当 `.env` 不是已有普通文件时，逐字复制 `.env.example` 为 `.env`，再设置为 `0600`。
 2. 创建 `.secrets/`（如果尚不存在），并把目录权限设置为 `0700`。
-3. 不生成任何随机密钥，不校验占位值，也不会把 `.env` 导出到当前 shell。
+3. 当仓库根目录下不存在 `services/WeKnora` 时，自动创建 `services/`，从腾讯上游浅克隆 `v0.7.2`，并验证其提交 SHA 与本项目锁定值完全一致。
+4. 当 `services/WeKnora` 已存在时，只验证它是干净的 Git 工作树、提交正确且包含 `docker-compose.yml`；不会自动 fetch、checkout、覆盖或丢弃本地改动。
+5. 不生成任何随机密钥，不校验 `.env` 占位值，也不会把 `.env` 导出到当前 shell。
 
-它是有限幂等的：已有普通文件 `.env` 时不会覆盖、补充新字段、重新校验，也不会修复该文件权限；只会确保 `.secrets/` 存在并设为 `0700`。模板升级后请人工比较新字段，并按需执行：
+它是有限幂等的：已有普通文件 `.env` 时不会覆盖、补充新字段、重新校验，也不会修复该文件权限；已有正确且干净的 WeKnora 工作树不会重复下载；只会确保 `.secrets/` 存在并设为 `0700`。模板升级后请人工比较新字段，并按需执行：
 
 ```bash
 chmod 600 .env
 ```
 
 > [!IMPORTANT]
-> 命令最后打印 `initialized ...` 只表示文件初始化步骤没有报错，不表示密钥、模型或发布授权已经可用。
+> 命令打印 `WeKnora source ready` 和最后的 `initialized ...`，才表示配置文件及锁定源码准备步骤均没有报错；这仍不表示密钥、模型或发布授权已经可用。
 > 如果 `.env` 路径已经存在但不是普通文件（例如误建成目录），请先停止并修复路径；不要继续执行后续命令。
+> 如果 WeKnora 目录存在但提交错误、包含本地改动或不是 Git 工作树，`init` 会 fail-closed。请先审计并保存其中的修改，不要为通过初始化而直接删除或强制覆盖。
+
+自动下载失败时，应先修复网络；若部署机不能访问 GitHub，可在可信且可联网环境的仓库根目录中人工准备同一锁定版本，再把包含 `.git` 的完整、干净目录安全传输到部署机的 `services/WeKnora`。准备命令为：
+
+```bash
+git clone --depth 1 --branch v0.7.2 --single-branch \
+  https://github.com/Tencent/WeKnora.git services/WeKnora
+git -C services/WeKnora rev-parse HEAD
+```
+
+预期 SHA 为 `3d5d8bfcdfeeea266b292b71cea616847af28d0f`。
 
 ### 首次生成的 `.env` 完整案例
 
@@ -531,7 +537,7 @@ unset WEKNORA_OWNER_TOKEN
 
 | 命令 | 作用与注意事项 |
 | --- | --- |
-| `./manage.sh init` | 首次复制 `.env.example`，设置本地权限并创建 `.secrets/`；不生成密钥、不校验配置 |
+| `./manage.sh init` | 首次复制 `.env.example`、设置权限、创建 `.secrets/`，并在缺失时自动克隆和验证锁定的 WeKnora；不生成密钥、不校验业务配置 |
 | `./manage.sh manifest [--corpus PATH]` | 从固定 corpus 生成并校验 `public-manifest.json`；授权漂移时失败 |
 | `./manage.sh plan` | 只读显示本次发布计划，不访问远端 |
 | `./manage.sh test` | 运行 Python、补丁、Go race、Web 测试与构建 |
@@ -652,6 +658,10 @@ npm run dev -- --port 5173 --strictPort
 Vite 只把 `/qa` 和 `/healthz` 代理到 `127.0.0.1:8091`。这里固定并严格占用 `5173`，因为 BFF 会严格匹配 `PUBLIC_ORIGIN=http://127.0.0.1:5173`；端口被占用时应先释放，或同时修改两处，不能让 Vite 自动换端口。模型和运行密钥只注入后端进程，不进入浏览器 bundle。
 
 ## 常见问题
+
+### `WeKnora source missing or incomplete`
+
+部署机没有主仓库刻意忽略的 `services/WeKnora`。在本集成目录重新执行 `./manage.sh init`，脚本会在路径完全不存在时自动克隆并验证锁定版本。如果该路径已经存在但不完整、提交不匹配或含本地改动，脚本会拒绝覆盖；应先审计和保存现有内容，再决定如何恢复干净的锁定工作树。
 
 ### `缺少环境变量 LLM_MODEL_NAME`
 

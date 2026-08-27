@@ -160,6 +160,7 @@ python3 -B scripts/audit_authority_readiness.py
 ```bash
 cd integrations/llm-wiki-public
 ./manage.sh init
+# 缺少 services/WeKnora 时，init 会自动克隆并校验锁定版本
 # 编辑 .env，替换所有 CHANGE_ME，设置模型地址/模型名，并填写首个 system admin 邮箱
 set -a
 . ./.env
