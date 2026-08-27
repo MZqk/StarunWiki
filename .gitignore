@@ -1,0 +1,22 @@
+# Generated local indexes and browser-inspection artifacts
+.knowledge-catalog/
+.playwright-cli/
+.playwright-mcp/
+__pycache__/
+*.py[cod]
+
+# Local-only public-Q&A runtime. It contains credentials, databases, backups,
+# dependencies, and generated output rather than canonical Wiki content.
+integrations/
+
+# Third-party WeKnora checkout and its local SQLite worktree.
+services/
+
+# Working research outputs are not part of the published knowledge base.
+内容补充缺口调研-2026-08/
+archive/research/
+
+# These text captures are restricted local evidence. Keep their public source
+# records, but never publish the captured website text to this public repo.
+raw/official-captures/
+raw/site-captures/

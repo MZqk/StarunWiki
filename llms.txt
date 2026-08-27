@@ -1,0 +1,20 @@
+# 深空天文拍摄知识库
+
+> 面向人类与 LLM Agent 的 Markdown 原生知识库，遵循 Open Knowledge Format v0.2。
+
+入口: /index.md
+维护规范: /00-知识库规范/知识库维护规范.md
+原始资料: /raw/index.md
+更新日志: /log.md
+
+推荐读取顺序:
+1. 读取 /index.md 选择主题。
+2. 读取对应分类的 index.md。
+3. 检查目标页面的 status、stale_after、review 和 sources。
+4. 顺着“关联知识”按需扩展上下文。
+
+约束:
+- 没有 verified 的页面是未验证内容。
+- stale_after 已到期的页面需要复核。
+- 不得把 stable 等同于人工核验。
+- 引用具体参数或时效性结论时回溯 sources。
