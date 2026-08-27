@@ -8,7 +8,7 @@ difficulty: "进阶"
 audience: "已掌握叠加、想要做宽带彩色（星系/星云）并正确合成亮度与色彩通道的拍摄者。"
 status: stable
 created: "2025-07-10"
-updated: "2026-07-30"
+updated: "2026-08-27"
 stale_after: "2027-07-30"
 generated:
   by: process:okf-migration
@@ -16,22 +16,47 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["单色相机获得且已正确校准、配准的 L/R/G/B 数据"]
+  条件: ["通道对应关系、线性状态、采样、背景和色彩校准输入已确认"]
+  不适用: ["把审美性调色宣称为唯一物理真色", "来源或通道映射不明的数据"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-effe6809
     resource: "https://chaoticnebula.com/pixinsight-lrgb-workflow/"
     title: "ChaoticNebula：Broadband LRGB 完整流程"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-0d4ce7ff
     resource: "https://www.theastrogeek.com/dark_sky_journal/pixinsight-lrgb-combine-tutorial"
     title: "The Astro Geek：PixInsight LRGB 合成分步教程"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-674f4c45
     resource: "https://chaoticnebula.com/pixinsight-scnr/"
     title: "ChaoticNebula：SCNR 与色彩平衡说明"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-333fed7b
     resource: "https://chaoticnebula.com/color-balancing-with-pixinsight-spectrophotometric-color-calibration/"
     title: "ChaoticNebula：Photometric/Spectrophotometric 色彩校准"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # LRGB处理与调色
 
@@ -49,6 +74,13 @@ sources:
 - 曲线拉伸：线性阶段用 ScreenTransferFunction（STF）仅用于预览；正式拉伸用 HistogramTransformation（拖动中灰/黑点）或 CurveTransformation（Arcsinh/自定义曲线）把暗部提亮，避免一次性过曝。
 - 通道对齐/色度噪声：合成后若仍有色噪，用 ACDNR（Chrominance 模式）针对颜色噪声做最终降噪；星点可用 StarNet/StarXTerminator 分离后再分别处理。
 - 局部增强：用 CurvesTransformation + 星点/结构蒙版（Star Mask / Range Mask）提升星云细节与对比，避免整体提亮导致背景发灰。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：单色相机获得且已正确校准、配准的 L/R/G/B 数据；成立条件：通道对应关系、线性状态、采样、背景和色彩校准输入已确认。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：把审美性调色宣称为唯一物理真色；来源或通道映射不明的数据。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 注意事项
 - 务必先在线性阶段完成色彩校准与 LinearFit，再拉伸；先拉伸后校准会导致色偏难以修正。

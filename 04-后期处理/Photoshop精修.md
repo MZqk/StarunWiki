@@ -8,7 +8,7 @@ difficulty: "进阶"
 audience: "已在 PixInsight/Siril 完成主流程、需要进入 Photoshop（或 Affinity Photo）做最终拉伸、降噪、星点管理与局部润色的用户。"
 status: stable
 created: "2025-07-10"
-updated: "2026-07-30"
+updated: "2026-08-27"
 stale_after: "2027-07-30"
 generated:
   by: process:okf-migration
@@ -16,22 +16,47 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["已完成天文专用校准、叠加和基础拉伸的展示候选图像"]
+  条件: ["保留线性母版和可回退副本，所有局部操作在全分辨率检查星点与背景"]
+  不适用: ["替代校准、配准或科学测量流程", "用生成式内容冒充原始天文信号"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-0d0bff07
     resource: "https://www.rc-astro.com/software/photoshop-bundle/"
     title: "RC Astro：Photoshop Bundle 工具说明（降噪/去星/梯度/缩星）"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-e1ba7dc2
     resource: "https://www.rc-astro.com/software/nxt/"
     title: "RC Astro：NoiseXTerminator 官方页"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-493930e8
     resource: "https://macobservatory.com/ai-astrophotography-image-processing/"
     title: "MacObservatory：AI 天文图像处理（RC Astro/GraXpert/StarNet++）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-6fe46cc1
     resource: "https://www.opticalmechanics.com/mastering-deep-sky-astrophotography-processing/"
     title: "Optical Mechanics：Mastering Deep-Sky 处理（降噪/星点/局部增强）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # Photoshop精修
 
@@ -50,6 +75,13 @@ sources:
 - 局部增强：用 Luminosity 蒙版（或自绘选区）对星云核心/暗云做 Curves 提亮或对比增强；用 Selective Color / Hue-Saturation 微调色相。
 - 星点着色：分离后的星点层可整体调色（如中性灰偏暖），避免紫边；用蒙版防止背景被污染。
 - 导出：最终存为 16-bit TIFF 母版，网络发布再转 8-bit sRGB JPEG/PNG，注意色彩空间转换。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：已完成天文专用校准、叠加和基础拉伸的展示候选图像；成立条件：保留线性母版和可回退副本，所有局部操作在全分辨率检查星点与背景。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：替代校准、配准或科学测量流程；用生成式内容冒充原始天文信号。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 注意事项
 - 不要用 8-bit 流程精修，会断阶（banding）；始终 16-bit 以上。

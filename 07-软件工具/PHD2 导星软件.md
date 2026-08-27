@@ -8,7 +8,7 @@ difficulty: "进阶"
 audience: "使用导星相机+导星镜/主镜离轴导星、需要提高跟踪精度（压低 RA/Dec 漂移与周期误差）的深空摄影者；通常与 N.I.N.A、SGP、APT 等拍摄软件联动。"
 status: stable
 created: "2025-07-10"
-updated: "2026-07-30"
+updated: "2026-08-27"
 stale_after: "2027-01-30"
 generated:
   by: process:okf-migration
@@ -16,34 +16,75 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["PHD2 当前稳定版连接兼容导星相机和赤道仪的导星系统"]
+  条件: ["配置向导、标定、Guiding Assistant 和日志分析均针对当前设备与天空完成"]
+  不适用: ["跨设备固定算法、曝光或 RMS 目标", "仅凭截图替代日志和主相机验收"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-56468e00
     resource: "https://openphdguiding.org/"
     title: "Open PHD Guiding 官网"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-63fdabf7
     resource: "https://openphdguiding.org/PHD2_User_Guide.pdf"
     title: "PHD2 用户指南(含 Multi-star 说明)"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-96cc784c
     resource: "https://openphdguiding.org/man-dev/Guide_algorithms.htm"
     title: "PHD2 Guide Algorithms 官方文档"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-91b0ee48
     resource: "https://adgsoftware.com/phd2/archive/man-2.5.0dev8/Trouble_shooting.htm"
     title: "PHD2 故障排查文档(calibration step-size)"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-48cec40f
     resource: "https://nighttime-imaging.eu/docs/develop/site/advanced/guiding/"
     title: "N.I.N.A 导星(PHD2)官方集成文档"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-1eb81c43
     resource: "https://www.astrobin.com/forum/post/166538/"
     title: "AstroBin 论坛 Star Lost 实际案例"
+    evidence_level: experience
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-phd2-basic-use
     resource: "https://openphdguiding.org/man/Basic_use.htm"
     title: "PHD2 官方文档：Basic Use"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-phd2-advanced-settings
-    resource: "https://openphdguiding.org/man/Advanced_settings.htm"
-    title: "PHD2 官方文档：Advanced Settings"
+    resource: "https://openphdguiding.org/manual/"
+    title: "PHD2 官方用户手册：Advanced Settings"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # PHD2 导星软件
 
@@ -60,6 +101,11 @@ sources:
 - 关键状态指标：RMS（总导星误差，角秒）、RA/Dec 误差曲线、曝光时间、SNR 和校准图。RMS 用来观察趋势和定位问题；最终应以主相机星点、成像采样、视宁度和拒片率判断是否达标。
 - 与 N.I.N.A 联动：N.I.N.A 的 Guiding 设 PHD2（External Guider/Phd2 服务器），N.I.N.A 可在序列中自动 Start/Stop 导星、读取 RMS 并在掉星时告警；亦可让 N.I.N.A 做居中后把导星交给 PHD2。
 - 曝光与信噪比：从能稳定检测导星星的几秒曝光起步，再结合 SNR、视宁度和误差曲线调整；弱星环境可加长曝光、改善对焦或换更亮导星。
+
+## 权威问答口径
+
+- PHD2 应为不同设备组合建立独立配置，并按官方 Basic Use 完成连接、选星、校准和导星；不能仅凭一个 RMS 数字判断整套主相机曝光是否合格。[^src-phd2-basic-use][^src-63fdabf7]
+- 高级参数要在明确故障证据后调整；焦距、像元、binning 和校准条件错误会影响下游参数与角秒报告，优先使用新配置向导和官方说明。[^src-phd2-advanced-settings]
 
 ## 注意事项
 - Star Lost – Low SNR：多因导星太暗/曝光过短/焦距太长导致星点 SNR 不足；解决——选更亮导星、加长曝光、检查导星镜/主镜焦点与跟踪是否稳定。

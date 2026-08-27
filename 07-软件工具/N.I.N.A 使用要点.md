@@ -8,7 +8,7 @@ difficulty: "进阶"
 audience: "已拥有赤道仪/相机/导星设备、希望用一台 Windows 电脑完成从对星到拍摄全流程自动化的深空摄影者；也适合从 APT、SGP 等迁移的进阶用户。"
 status: stable
 created: "2025-07-10"
-updated: "2026-07-30"
+updated: "2026-08-27"
 stale_after: "2027-01-30"
 generated:
   by: process:okf-migration
@@ -16,28 +16,61 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["Windows 上使用当前 N.I.N.A. 稳定版及兼容 ASCOM/原生驱动的采集系统"]
+  条件: ["菜单、插件、设备支持与序列行为以当前官方文档和本机版本复核"]
+  不适用: ["将 develop 文档直接视为稳定版行为", "未经白天干跑的无人值守自动化"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-cfce4141
     resource: "https://nighttime-imaging.eu/"
     title: "N.I.N.A 官网/下载与更新说明"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-e587bbb6
     resource: "https://nighttime-imaging.eu/docs/master/site/contributing/plugins/"
     title: "N.I.N.A 插件系统官方文档"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-b938f0f6
     resource: "https://nighttime-imaging.eu/docs/master/site/advanced/advancedsequence/"
     title: "N.I.N.A 高级序列官方文档"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-48cec40f
     resource: "https://nighttime-imaging.eu/docs/develop/site/advanced/guiding/"
     title: "N.I.N.A 导星官方文档(PHD2集成)"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-de0cdf97
     resource: "https://pi.bestxtech.com/nina/"
     title: "N.I.N.A 中文使用指南"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-581bf38e
     resource: "https://nighttime-imaging.eu/news/"
     title: "N.I.N.A 3.0 版本更新日志示例"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # N.I.N.A 使用要点
 
@@ -56,6 +89,11 @@ sources:
 - 高级序列（Advanced Sequencer）：由 Sequence Start / Target / End 三段组成，可用触发器（Trigger）、条件（Container/Condition）、循环（Loop）编排复杂流程（如先拍亮场预热、到中天翻转 Meridian Flip 后继续、按温度/湿度切换计划），可存为 XML 模板复用。
 - 插件生态：通过 Plugin Manifest Repository 在应用内插件页直接下载安装（如 Image Planner、Orbitrary、Safety Monitors、Dome 控制等），扩展官方未覆盖的专用功能。
 - Planetarium 集成：可与 Stellarium、SkySafari 等星图联动发送/接收目标坐标，辅助规划与 GoTo。
+
+## 权威问答口径
+
+- N.I.N.A. 的功能、系统要求、插件和序列行为以当前官方文档与版本日志为准；插件存在不代表它适配所有设备或与当前版本兼容。[^src-cfce4141][^src-e587bbb6][^src-b938f0f6]
+- 自动化序列必须经过本机连接、模拟/白天干跑和夜间安全收尾验证；文档支持某功能不等于用户系统已经可无人值守。[^src-b938f0f6]
 
 ## 注意事项
 - 务必先装 ASCOM Platform 与对应驱动，再在 N.I.N.A 内添加设备；驱动版本不匹配会无法连接或掉线。

@@ -17,6 +17,8 @@ review:
   state: needs-human-review
   owner: knowledge-base-maintainer
 applies_to:
+  系统: ["Seestar 导出的多张光帧，以及仅使用本页数据状态门禁的其他智能望远镜数据"]
+  条件: ["Siril 版本、设备导出说明和实际文件状态均与页面来源一致，并使用独立工作副本"]
   设备:
     - "Seestar 导出的多张光帧：以 Siril 的 Seestar 专用教程和设备当前导出说明均能对应为前提"
     - "其他智能望远镜：仅可使用本页的数据状态门禁，不自动继承 Seestar 脚本或校准结论"
@@ -33,12 +35,14 @@ sources:
     rights: unknown
     accessed_at: "2026-08-26"
     usage: metadata-only
+    evidence_level: internal-ledger
   - id: raw-smart-telescope-official-captures
     resource: "/raw/受限原始文本捕获说明.md"
     title: "智能望远镜与深空后期官网受限原始文本捕获说明"
     rights: unknown
     accessed_at: "2026-08-27"
     usage: "local-evidence-capture; public-link-only"
+    evidence_level: internal-ledger
   - id: src-siril-seestar
     resource: "https://siril.org/tutorials/seestar/"
     title: "Siril 官方：Processing ZWO Seestar images"
@@ -46,18 +50,22 @@ sources:
     accessed_at: "2026-08-26"
     usage: link-only
     version: "教程写明脚本要求 Siril 1.4.0 或更高版本"
+    evidence_level: primary
   - id: src-siril-script-files
     resource: "https://siril.readthedocs.io/en/latest/scripts/Script-files.html"
     title: "Siril 官方文档：Script Files"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: link-only
+    evidence_level: primary
   - id: src-seestar-file-transfer
     resource: "https://h5.seestar.com/course/295008?locale=zh-CN"
     title: "Seestar 学堂：使用 Wi-Fi 传输文件"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: link-only
+    evidence_level: primary
+
 ---
 
 # 智能望远镜导出数据的 Siril 工作流
@@ -113,6 +121,13 @@ Siril 专用教程把裁切、背景处理、板解/色彩校准、拉伸和导�
 - 每一步的可编辑中间结果和关键参数；
 - 线性母版（如有）与单独的分享版；
 - 未确认问题、设备/App/固件版本和对应官方 URL。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：Seestar 导出的多张光帧，以及仅使用本页数据状态门禁的其他智能望远镜数据；成立条件：Siril 版本、设备导出说明和实际文件状态均与页面来源一致，并使用独立工作副本。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：厂商成图、已堆栈结果、格式/处理状态不明文件，或设备说明已要求其他专用流程的数据。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 关联知识
 

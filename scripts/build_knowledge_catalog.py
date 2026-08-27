@@ -21,7 +21,18 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / ".knowledge-catalog" / "retrieval-corpus.jsonl"
 FORMAL_DIR_RE = re.compile(r"^[0-9]{2}-")
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)")
-REQUIRED_FIELDS = {"type", "title", "description", "tags", "status", "generated", "sources"}
+REQUIRED_FIELDS = {
+    "type",
+    "title",
+    "description",
+    "tags",
+    "status",
+    "generated",
+    "review",
+    "stale_after",
+    "applies_to",
+    "sources",
+}
 VALID_STATUSES = {"draft", "stable", "deprecated"}
 DOMAIN_SLUGS = {
     "00-知识库规范": "governance",
@@ -134,6 +145,22 @@ def build_records() -> list[dict[str, Any]]:
         review = metadata.get("review") or {}
         if not isinstance(review, dict) or not review.get("state"):
             raise CatalogError(f"{relative} review.state 不能为空")
+        applies_to = metadata.get("applies_to") or {}
+        if not isinstance(applies_to, dict):
+            raise CatalogError(f"{relative} applies_to 必须是对象")
+        for field in ("系统", "条件", "不适用"):
+            values = applies_to.get(field)
+            if not isinstance(values, list) or not values or not all(str(value).strip() for value in values):
+                raise CatalogError(f"{relative} applies_to.{field} 必须是非空列表")
+        verified = metadata.get("verified")
+        if verified:
+            if not isinstance(verified, dict):
+                raise CatalogError(f"{relative} verified 必须是包含 by/at/scope 的对象")
+            verifier = str(verified.get("by") or "")
+            if not verifier.startswith("human:"):
+                raise CatalogError(f"{relative} verified.by 必须使用 human: Actor")
+            if not verified.get("at") or not verified.get("scope"):
+                raise CatalogError(f"{relative} verified 必须包含 at/scope")
         sources = metadata.get("sources")
         if not isinstance(sources, list) or not sources:
             raise CatalogError(f"{relative} sources 必须是非空列表")
@@ -181,7 +208,10 @@ def build_records() -> list[dict[str, Any]]:
                 "tags": sorted(str(tag) for tag in metadata.get("tags") or []),
                 "text": body,
                 "type": str(metadata["type"]),
-                "verified": bool(metadata.get("verified")),
+                "verified": bool(verified),
+                "verified_at": str(verified.get("at")) if verified else None,
+                "verified_by": str(verified.get("by")) if verified else None,
+                "verified_scope": str(verified.get("scope")) if verified else None,
             }
         )
     return records

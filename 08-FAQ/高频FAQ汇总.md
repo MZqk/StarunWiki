@@ -8,7 +8,7 @@ difficulty: "新手"
 audience: "全体爱好者"
 status: stable
 created: "2025-07-10"
-updated: "2026-08-01"
+updated: "2026-08-27"
 stale_after: "2027-01-30"
 generated:
   by: process:compliance-remediation
@@ -16,52 +16,113 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["深空拍摄中常见的跟踪、对焦、校准、供电、结露和处理问题初筛"]
+  条件: ["短答案必须回到专题页，并用区分测试、日志或原始帧确认"]
+  不适用: ["把候选原因写成确定诊断", "在设备、版本和环境未知时给出固定参数"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-7baf66a4
     resource: "https://astrobackyard.com/tracking-astrophotography/"
     title: "AstroBackyard - How Do I Reduce Tracking Errors"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
   - id: src-d4667049
     resource: "https://astrobackyard.com/dew-heaters-astrophotography/"
     title: "AstroBackyard - Dew Heaters for Astrophotography"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
   - id: src-fd864823
     resource: "https://astrobackyard.com/white-balance-astrophotography/"
     title: "AstroBackyard - White Balance for Astrophotography"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
   - id: src-ea390350
     resource: "https://www.opticalmechanics.com/mastering-polar-alignment-methods-tools-and-fixes/"
     title: "Optical Mechanics - Mastering Polar Alignment"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-e493ed61
     resource: "https://www.stellarnomads.com/polar-alignment/"
     title: "Stellar Nomads - Polar Alignment Complete Guide"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-ffec61eb
     resource: "https://www.astroshop.eu/magazine/practical-tips/weigand-s-technical-tips/the-perfect-flat-field/i,1520"
     title: "Astroshop - The Perfect Flat Field"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-64827a99
     resource: "https://www.nighttime-imaging.eu/docs/master/site/advanced/backlashmeasurement/"
     title: "N.I.N.A. Docs - Focuser Backlash Measurement"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-87295360
     resource: "https://skyandtelescope.org/astronomomy-blogs/imaging-foundations-richard-wright/finding-your-color-balance/"
     title: "Sky & Telescope - Finding Your Color Balance"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-67770d88
     resource: "https://astropix.com/html/astrophotography/customwb.html"
     title: "AstroPix - Custom White Balance for Astrophotography"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-a9be2cf1
     resource: "https://pegasusastro.zendesk.com/hc/en-us/articles/23897753147037-Cable-management-recommendations"
     title: "Pegasus Astro - Cable Management Recommendations（电源/线损）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-35ec009a
     resource: "https://www.astropix.com/books/BGAIP/chapter3/303l2.html"
     title: "AstroPix - Repair Trailed Stars"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-731ab9c8
     resource: "https://www.cloudynights.com/forums/forum/80-beginning-deep-sky-imaging/"
     title: "CloudyNights - Beginning Deep Sky Imaging 论坛"
+    evidence_level: experience
+    rights: unknown
+    usage: link-only
   - id: src-phd2-basic-use
     resource: "https://openphdguiding.org/man/Basic_use.htm"
     title: "PHD2 官方文档：Basic Use"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-siril-calibration
     resource: "https://siril.readthedocs.io/en/latest/preprocessing/calibration.html"
     title: "Siril 官方文档：Calibration"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # 高频FAQ汇总
 
@@ -79,6 +140,11 @@ sources:
 - 【色彩偏色】问题：整体偏红/绿/蓝，或星点颜色怪异。结论：多因白平衡设置不当、未做本底/平场校准或后期色彩失衡；RAW 拍摄 + 合理白平衡 + 校准帧可避免前期偏色。一句话操作：DSLR 用日光白平衡或拍自定义白平衡、全程 RAW，处理时用平场+暗场校准并做色彩平衡(WB)校正。
 - 【电源不足】问题：设备随机掉线、赤道仪异常或相机失联。结论：候选原因包括负载端压降、电源或端口超限、接头接触不良及 USB 链路不稳；额定电压、电流、极性和端口上限必须以每台设备手册为准。一句话操作：记录设备同时启动时的实测峰值电流和负载端电压，再按电流、长度、允许压降、接头与环境温度选择电源、保险和线材，不套用固定“1.5 倍”或 AWG 门槛。
 - 【极轴不准】问题：连续曝光出现赤纬漂移或围绕导星星的场旋转。结论：极轴偏差只是星点异常的候选原因之一，导星不能消除场旋转；短曝光是否可见以及可接受误差取决于焦距、采样、曝光、目标位置和总时长。一句话操作：用极轴镜、漂移法或电子极轴工具完成校准，再以计划中的主相机曝光和跨序列星点/漂移实测验收。
+
+## 权威问答口径
+
+- 导星问题应按 PHD2 官方流程核对设备配置、校准、选星和日志，不能用论坛中的“合格 RMS”阈值代替主相机星点验收。[^src-phd2-basic-use]
+- Flat、Dark、Bias/Dark-flat 的组合取决于相机行为与处理软件模型；回答“是否必须拍某类校准帧”时必须带上相机、温度、增益、曝光和软件条件。[^src-siril-calibration]
 
 ## 注意事项
 - 校准帧不要套用“全都与亮场相同”的规则：Dark 匹配 Light；Dark Flat 匹配 Flat；Bias 匹配相机读出状态；Flat 保持同一光路/滤镜并未饱和。

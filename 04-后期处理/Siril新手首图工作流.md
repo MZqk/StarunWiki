@@ -16,40 +16,68 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["Siril 当前稳定版本可读取的深空原始子帧及匹配校准数据"]
+  条件: ["先确认文件类型、相机模式、目录、校准关系和磁盘空间"]
+  不适用: ["只剩 JPEG 或厂商成图", "未知通道映射、混合数据或设备专用流程"]
 sources:
   - id: raw-p0-user-scenarios
     resource: "/raw/2026-07-30-P0用户场景与首图工作流来源.md"
     title: "P0：用户场景、首图工作流与诊断页面来源记录"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-siril-docs
     resource: "https://siril.readthedocs.io/"
     title: "Siril 官方文档"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-siril-calibration
     resource: "https://siril.readthedocs.io/en/latest/preprocessing/calibration.html"
     title: "Siril 官方文档：Calibration"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-siril-stacking
     resource: "https://siril.readthedocs.io/en/latest/preprocessing/stacking.html"
     title: "Siril 官方文档：Stacking"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-siril-scripts
     resource: "https://siril.readthedocs.io/en/latest/scripts/Script-files.html"
     title: "Siril 官方文档：Script Files"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-siril-seestar
     resource: "https://siril.org/tutorials/seestar/"
     title: "Siril 官方：Processing ZWO Seestar images"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: link-only
+    evidence_level: primary
   - id: raw-smart-telescope-official-ledger
     resource: "/raw/2026-08-26-智能望远镜与深空后期官方资料台账.md"
     title: "智能望远镜与深空后期官方资料台账"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: metadata-only
+    evidence_level: internal-ledger
   - id: raw-smart-telescope-official-captures
     resource: "/raw/受限原始文本捕获说明.md"
     title: "智能望远镜与深空后期官网受限原始文本捕获说明"
     rights: unknown
     accessed_at: "2026-08-27"
     usage: "local-evidence-capture; public-link-only"
+    evidence_level: internal-ledger
+
 ---
 
 # Siril 新手首图工作流
@@ -123,6 +151,13 @@ Siril 的整合文档说明，叠加通过对齐并组合多张图像改善信�
 - 线性主图、整合设置和拒绝图或等效检查输出；
 - 可编辑处理项目、脚本或关键参数；
 - 一张导出图，以及能回到母版的位置。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：Siril 当前稳定版本可读取的深空原始子帧及匹配校准数据；成立条件：先确认文件类型、相机模式、目录、校准关系和磁盘空间。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：只剩 JPEG 或厂商成图；未知通道映射、混合数据或设备专用流程。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 关联知识
 

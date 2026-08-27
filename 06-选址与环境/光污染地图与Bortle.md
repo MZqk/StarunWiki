@@ -8,7 +8,7 @@ difficulty: "新手"
 audience: "刚入门、准备第一次出摊或寻找拍摄点的深空爱好者"
 status: stable
 created: "2025-07-10"
-updated: "2026-08-01"
+updated: "2026-08-27"
 stale_after: "2027-01-30"
 generated:
   by: process:knowledge-optimization
@@ -16,22 +16,46 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["使用地图和现场观测评估深空拍摄天空背景的规划场景"]
+  条件: ["地图数据日期、分辨率、天气、局地灯光和实际天空测量共同解释"]
+  不适用: ["把地图颜色或 Bortle 等级当作精确实时测量", "据此保证成像结果"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-24170615
     resource: "https://lightpollutionmap.info/"
     title: "Light Pollution Map 官网"
+    evidence_level: primary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-132241b7
     resource: "https://astrophotographylens.com/blogs/astro/bortle-scale"
     title: "Bortle Scale 详解（Astrophotography Lens）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-30da6572
     resource: "https://baike.baidu.com/item/%E6%B3%A2%E7%89%B9%E5%B0%94%E6%9A%97%E7%A9%BA%E5%88%86%E7%B1%BB%E6%B3%95/3811822"
     title: "波特尔暗空分类法（百度百科）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
   - id: src-e93231aa
     resource: "https://astrocompare.com/narrowband-filters-light-pollution-guide.html"
     title: "城市窄带滤镜应对光污染指南（AstroCompare）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # 光污染地图与Bortle
 
@@ -46,6 +70,13 @@ sources:
 - 光污染地图使用卫星观测或模型估计区域夜光，适合找候选方向和比较相对趋势。地图图层、年份、分辨率与显示算法会变化，使用前应阅读站点说明。[^src-24170615]
 - 窄带或双窄带滤镜可提高部分发射线目标在亮背景下的对比，但效果取决于目标光谱、滤镜带宽、相机响应、月亮与当地光源；“Bortle 6~8 也能拍”不是画质或曝光保证。[^src-e93231aa]
 - 星系和反射星云含有大量连续谱信号，窄带不能替代宽带数据。是否转移到更暗地点，应同时评估目标高度、天空背景、交通与安全，而不是设定统一的 Bortle 4 门槛。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：使用地图和现场观测评估深空拍摄天空背景的规划场景；成立条件：地图数据日期、分辨率、天气、局地灯光和实际天空测量共同解释。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：把地图颜色或 Bortle 等级当作精确实时测量；据此保证成像结果。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 注意事项
 - 地图数据为卫星反演的平均背景亮度，局部树荫、地面灯、地平线附近辉光会让实际体验差于地图数值，务必到现场用 SQM 或手机测光复核。

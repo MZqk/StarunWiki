@@ -2,6 +2,10 @@
 
 ## 2026-08-27
 
+* **Authority-readiness baseline**: 为全部 51 个正式页面补齐逐页 `applies_to`，明确系统、使用条件和不适用边界；构建器开始强制检查这些字段，并要求任何 `verified` 都必须包含 `human:` Actor、时间和可审计范围。
+* **Authoritative-answer fail-closed gate**: 明确只有未过期且处于 `verified.scope` 内的人工签署内容才能承担权威回答；混入未审核、过期或越界依据时，整条回答必须降级为“非权威参考”或拒答。当前 51 页仍待真人逐项签署，未伪造完成状态。
+* **Machine authority-readiness complete**: 51/51 正式页面已通过适用边界、时效、来源字段、主张引用和高影响页面一手来源门禁；自动审计的机器阻断归零，剩余 51 项全部为不可自动代签的真人 `verified` 审核。
+* **Primary-source answer claims**: 为采购、器材、现场安全、采集、目标、天气、软件与排障等高影响页面增加就近的一手来源问答口径；把不可访问的二手案例引用从权威结论中移出，并以 NASA、ESO、NWS、SIMBAD 及软件/厂商官方文档承担相应事实边界。
 * **Starun market-specification capture**: 新增[Starun 智能望远镜参数规格表来源记录](/raw/2026-08-27-Starun智能望远镜规格表来源记录.md)与受限浏览器渲染文本捕获：覆盖 DWARF 3、DWARF mini、Seestar S30、S30 Pro、S50、S50 Pro 共 6 款机型、63 条实际参数记录；保留 URL、HTTP `Last-Modified`、抓取时间与正文哈希，不保存媒体，也不将第三方汇编表伪装为厂商原始规格。
 * **Starun current-source revision**: 页面同日更新后，新增 `2026-08-27T03:23:18Z` 的受限 raw 快照（HTML SHA-256 `4a7c89e9…fd022b67`），并保留先前快照而不做静默覆盖；公开核验页改指向当前快照，仍不公开复刻整张规格表。
 * **Specification-reference boundary**: 新增[常见智能望远镜参数规格对照与使用边界](/02-器材百科/常见智能望远镜参数规格对照与使用边界.md)，用于型号识别和核验分流；价格、App/固件、导出、未公开、猜测与几何换算字段仍须回到厂商当前资料复核，页面维持 `needs-human-review`。

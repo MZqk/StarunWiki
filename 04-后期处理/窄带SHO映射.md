@@ -8,7 +8,7 @@ difficulty: "高手"
 audience: "使用 Ha/SII/OIII 窄带滤镜拍摄星云，希望把单色信号映射成科学/艺术化彩色（哈勃调色板）或把窄带融入宽带的进阶用户。"
 status: stable
 created: "2025-07-10"
-updated: "2026-07-30"
+updated: "2026-08-27"
 stale_after: "2027-07-30"
 generated:
   by: process:okf-migration
@@ -16,22 +16,47 @@ generated:
 review:
   state: needs-human-review
   owner: knowledge-base-maintainer
+applies_to:
+  系统: ["已校准配准的 SII、Hα、OIII 单色窄带数据"]
+  条件: ["通道身份、线性状态、信噪比和映射目的明确，并保留原始通道"]
+  不适用: ["把 SHO 色彩称为肉眼真实颜色", "缺失通道或通道身份不明时伪造映射"]
 sources:
   - id: raw-research
     resource: "/raw/素材调研报告.md"
     title: "深空天文拍摄知识库素材调研报告"
+    evidence_level: internal-ledger
+    rights: unknown
+    usage: metadata-only
+    accessed_at: "2026-08-27"
   - id: src-da4c8fce
     resource: "https://thecoldestnights.com/2020/06/pixinsight-dynamic-narrowband-combinations-with-pixelmath/"
     title: "The Coldest Nights：Dynamic narrowband combinations with PixelMath"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-ed6a671f
     resource: "https://astroimagery.com/techniques/post-processing/hubble-palette-colours/"
     title: "AstroImagery：Hubble Palette 颜色映射（Ha/SII/OIII→RGB）"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-bdcdbfd5
     resource: "https://nightskypics.com/sho-vs-dynamic-narrowband-combinations/"
     title: "NightSkyPics：SHO 与动态窄带组合对比"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
   - id: src-e9e0e88b
     resource: "https://www.highpointscientific.com/astronomy-hub/post/astro-photography-guides/combining-narrowband-data-pixinsight"
     title: "High Point Scientific：PixInsight 合成窄带数据教程"
+    evidence_level: secondary
+    rights: unknown
+    usage: link-only
+    accessed_at: "2026-08-27"
+
 ---
 # 窄带SHO映射
 
@@ -50,6 +75,13 @@ sources:
 - 混合前准备：动态映射要求各窄带通道已拉伸且背景值近似一致；否则先用 CurvesTransformation 调整。
 - HaRGB（窄带+宽带）：把 Ha 作为亮度/细节层用 LRGBCombination 并入 RGB 彩色图（Ha 作 L 或额外细节），突出恒星形成区；星系常加 Ha 强调 HII 区。
 - 亮度层与调色：SHO 合成后建议另建 Luminance 层（如用 Ha 或 Ha+OIII）提升质感；再用 CurvesTransformation 的 Hue 微调星点颜色（紫色星点可对星蒙版做 SCNR Green 再反相）。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：已校准配准的 SII、Hα、OIII 单色窄带数据；成立条件：通道身份、线性状态、信噪比和映射目的明确，并保留原始通道。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：把 SHO 色彩称为肉眼真实颜色；缺失通道或通道身份不明时伪造映射。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 注意事项
 - PixelMath 表达式中各通道系数之和必须等于 1，否则会截断/溢出（PixelMath 输出归一化到 [0,1]）。

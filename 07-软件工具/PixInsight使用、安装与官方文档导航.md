@@ -17,6 +17,8 @@ review:
   state: needs-human-review
   owner: knowledge-base-maintainer
 applies_to:
+  系统: ["PixInsight 官方安装、许可、平台支持、文档与支持入口"]
+  条件: ["安装或购买前重新核对当前 FAQ、系统要求、许可和下载页面"]
   软件与版本:
     - "PixInsight：以 2026-08-27 访问的 FAQ（页面标注 Updated 2024 July 1）和当前官方下载/文档页面为准"
   平台:
@@ -32,12 +34,14 @@ sources:
     rights: unknown
     accessed_at: "2026-08-26"
     usage: metadata-only
+    evidence_level: internal-ledger
   - id: raw-smart-telescope-official-captures
     resource: "/raw/受限原始文本捕获说明.md"
     title: "智能望远镜与深空后期官网受限原始文本捕获说明"
     rights: unknown
     accessed_at: "2026-08-27"
     usage: "local-evidence-capture; public-link-only"
+    evidence_level: internal-ledger
   - id: src-pixinsight-faq
     resource: "https://pixinsight.com/faq/index.html"
     title: "PixInsight FAQ"
@@ -45,18 +49,22 @@ sources:
     accessed_at: "2026-08-26"
     usage: link-only
     version: "FAQ 页面标注 Updated 2024 July 1"
+    evidence_level: primary
   - id: src-pixinsight-docs
-    resource: "https://pixinsight.com/doc/"
-    title: "PixInsight Reference Documentation"
+    resource: "https://www.pixinsight.com/resources/"
+    title: "PixInsight Resources"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: link-only
+    evidence_level: primary
   - id: src-pixinsight-tutorials
     resource: "https://pixinsight.com/tutorials/"
     title: "PixInsight Tutorials"
     rights: unknown
     accessed_at: "2026-08-26"
     usage: link-only
+    evidence_level: primary
+
 ---
 
 # PixInsight 使用、安装与官方文档导航
@@ -95,10 +103,17 @@ PixInsight FAQ 本身并不为 DWARF、Seestar、传统相机或某个目标给�
 要开始一个实际处理任务，先完成三件事：
 
 1. 确认数据状态：厂商成图、已堆栈结果、原始/线性帧不能共享同一套步骤。
-2. 以[官方参考文档](https://pixinsight.com/doc/)定位具体模块，再核对该模块的版本和输入要求。[^src-pixinsight-docs]
+2. 从[官方资源页](https://www.pixinsight.com/resources/)进入参考文档、教程或专题资料，再核对具体模块的版本和输入要求。[^src-pixinsight-docs]
 3. 在独立副本上验证，并保存每次改变图像意义的参数、项目文件和中间结果。
 
 智能望远镜导出的文件先走[产品边界与文件导出前提](/02-器材百科/智能望远镜：产品边界、文件导出与桌面后期前提.md)；若是 Seestar 的多张光帧，先检查[专用 Siril 工作流](/04-后期处理/智能望远镜导出数据的Siril工作流.md)是否适用，而不是因为拥有 PixInsight 就跳过数据状态确认。
+
+## 权威问答口径
+
+- 本页可承担的回答范围：PixInsight 官方安装、许可、平台支持、文档与支持入口；成立条件：安装或购买前重新核对当前 FAQ、系统要求、许可和下载页面。
+- 遇到以下情况必须拒绝确定结论或转入专项页/实测：将 FAQ 分类或本页导航当作任何数据集的官方处理步骤、参数配方或插件效果承诺。
+- 具体数值、兼容性、软件行为或安全结论只使用正文就近绑定的来源，并同时受 `stale_after` 与人工 `verified.scope` 限制。
+
 
 ## 关联知识
 
