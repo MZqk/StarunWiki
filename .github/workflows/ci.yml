@@ -1,0 +1,265 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "26"
+  PYTHONPATH: src
+  WEKNORA_REPOSITORY: https://github.com/Tencent/WeKnora.git
+  WEKNORA_COMMIT: 3d5d8bfcdfeeea266b292b71cea616847af28d0f
+
+jobs:
+  platform-python:
+    name: platform-python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked Python environment
+        run: uv sync --frozen
+      - name: Run Python tests
+        run: uv run python -m unittest discover -s tests -v
+
+  bff:
+    name: bff
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/bff
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/bff/go.mod
+          cache-dependency-path: apps/bff/go.sum
+      - name: Test BFF with race detector
+        run: go test -race ./...
+
+  web:
+    name: web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install locked Web dependencies
+        run: npm ci
+      - name: Test Web
+        run: npm test
+      - name: Build Web
+        run: npm run build
+
+  deep-sky-pack:
+    name: deep-sky-pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked Python environment
+        run: uv sync --frozen
+      - name: Verify tracked pack entry points
+        run: |
+          test -f knowledge-packs/deep-sky/index.md
+          test -d knowledge-packs/deep-sky/00-知识库规范
+          test -d knowledge-packs/deep-sky/09-踩坑与复盘
+          test -d knowledge-packs/deep-sky/releases
+      - name: Run pack tests
+        run: uv run python -m unittest discover -s tests -v
+      - name: Reject tracked restricted captures
+        shell: bash
+        run: |
+          if git ls-files -- \
+            'knowledge-packs/deep-sky/raw/official-captures/**' \
+            'knowledge-packs/deep-sky/raw/site-captures/**' | grep -q .; then
+            echo "restricted raw captures must not be tracked" >&2
+            exit 1
+          fi
+
+  release-integrity:
+    name: release-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked Python environment
+        run: uv sync --frozen
+      - name: Validate Git-versioned release snapshots
+        run: |
+          uv run python - <<'PY'
+          from starunwiki.pack import load_pack
+          from starunwiki.release import verify_release_directory
+
+          pack = load_pack("deep-sky")
+          release_dirs = sorted(path for path in pack.releases_root.glob("public-*") if path.is_dir())
+          if not release_dirs:
+              raise SystemExit("no Git-versioned deep-sky release found")
+          for release_dir in release_dirs:
+              verify_release_directory(pack, release_dir)
+          PY
+
+  compat-v1:
+    name: compat-v1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Sync locked Python environment
+        run: uv sync --frozen
+      - name: Validate shell wrappers
+        run: |
+          test -x manage.sh
+          test -x integrations/llm-wiki-public/manage.sh
+          test -x integrations/llm-wiki-public/run-native-weknora.sh
+          test -x deploy/weknora/run-native.sh
+          git ls-files --error-unmatch integrations/llm-wiki-public/run-native-weknora.sh
+          bash -n manage.sh
+          bash -n integrations/llm-wiki-public/manage.sh
+          bash -n integrations/llm-wiki-public/run-native-weknora.sh
+          bash -n deploy/weknora/run-native.sh
+      - name: Verify legacy manage entry forwards from another directory
+        run: |
+          root_help="$(./manage.sh --help)"
+          legacy_stderr="$(mktemp)"
+          legacy_help="$(cd "${RUNNER_TEMP}" && "${GITHUB_WORKSPACE}/integrations/llm-wiki-public/manage.sh" --help 2>"${legacy_stderr}")"
+          test "${legacy_help}" = "${root_help}"
+          grep -Eiq 'deprecated|deprecation|弃用' "${legacy_stderr}"
+      - name: Run compatibility tests when present
+        run: |
+          if [ -d tests/compatibility ]; then
+            uv run python -m unittest discover -s tests/compatibility -v
+          fi
+
+  compose:
+    name: compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned WeKnora source
+        run: |
+          git clone --filter=blob:none --no-checkout "${WEKNORA_REPOSITORY}" services/WeKnora
+          git -C services/WeKnora fetch --depth 1 origin "${WEKNORA_COMMIT}"
+          git -C services/WeKnora checkout --detach FETCH_HEAD
+          test "$(git -C services/WeKnora rev-parse HEAD)" = "${WEKNORA_COMMIT}"
+          test -z "$(git -C services/WeKnora status --porcelain --untracked-files=normal)"
+      - name: Check pinned WeKnora patch
+        run: git -C services/WeKnora apply --check "${GITHUB_WORKSPACE}/deploy/weknora/weknora-v0.7.2-sqlite-wiki.patch"
+      - name: Render Compose configuration with placeholders
+        env:
+          STARUNWIKI_ROOT: ${{ github.workspace }}
+          WEKNORA_SOURCE_DIR: ${{ github.workspace }}/services/WeKnora
+          STARUNWIKI_CONFIG_ENV: ${{ runner.temp }}/ci.env
+          STARUNWIKI_RUNTIME_ENV: ${{ runner.temp }}/runtime.env
+          STARUNWIKI_MANIFEST_PATH: ${{ github.workspace }}/knowledge-packs/deep-sky/releases/public-de219d707e39/manifest.json
+          STARUNWIKI_AUTO_MIGRATE: "false"
+        run: |
+          cp .env.example "${RUNNER_TEMP}/ci.env"
+          touch "${RUNNER_TEMP}/runtime.env"
+          docker compose \
+            -p llm-wiki-public \
+            --project-directory "${GITHUB_WORKSPACE}/services/WeKnora" \
+            --env-file "${RUNNER_TEMP}/ci.env" \
+            -f services/WeKnora/docker-compose.yml \
+            -f deploy/compose.yml \
+            config --format json > "${RUNNER_TEMP}/compose.json"
+      - name: Validate effective Compose contract
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+
+          config = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) / "compose.json").read_text())
+          services = config["services"]
+          for required in ("app", "docreader", "public-bff", "public-web"):
+              if required not in services:
+                  raise SystemExit(f"missing Compose service: {required}")
+          for excluded in ("frontend", "postgres", "redis"):
+              if excluded in services:
+                  raise SystemExit(f"disabled service unexpectedly active: {excluded}")
+          if str(services["app"].get("environment", {}).get("AUTO_MIGRATE", "")).lower() != "false":
+              raise SystemExit("M0 legacy Compose must render AUTO_MIGRATE=false")
+          volumes = config.get("volumes", {})
+          if volumes.get("weknora-sqlite-data", {}).get("name") != "llm-wiki-public-weknora-sqlite-data":
+              raise SystemExit("WeKnora volume compatibility name changed")
+          if volumes.get("public-bff-sqlite-data", {}).get("name") != "llm-wiki-public-bff-sqlite-data":
+              raise SystemExit("BFF volume compatibility name changed")
+          PY
+
+  secrets-and-cleanliness:
+    name: secrets-and-cleanliness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check patch whitespace
+        run: |
+          git show --check --format= HEAD
+          git diff --check
+      - name: Reject tracked runtime state and secrets
+        shell: bash
+        run: |
+          forbidden="$(git ls-files | grep -E '(^|/)(\.env$|config\.env$|\.secrets/|secrets/|\.runtime/|\.runtime\.migrate-[^/]+/|release-state\.json$|[^/]+\.db(-shm|-wal)?$)' || true)"
+          if [ -n "${forbidden}" ]; then
+            echo "tracked runtime state or secret-like files:" >&2
+            echo "${forbidden}" >&2
+            exit 1
+          fi
+      - name: Verify ignore and source-control boundaries
+        shell: bash
+        run: |
+          git check-ignore -q services/WeKnora/example
+          git check-ignore -q services/WeKnora-sqlite-dev/example
+          git check-ignore -q .runtime/example
+          git check-ignore -q .runtime.migrate-test/secrets/runtime.env
+          git check-ignore -q integrations/llm-wiki-public/.secrets/example
+          if git check-ignore -q apps/bff/config.go; then
+            echo "apps/bff must remain source-controlled" >&2
+            exit 1
+          fi
+          if git check-ignore -q knowledge-packs/deep-sky/releases/public-de219d707e39/authorization.json; then
+            echo "approved release snapshots must remain source-controlled" >&2
+            exit 1
+          fi
+      - name: Reject absolute user paths in tracked release files
+        shell: bash
+        run: |
+          if git grep -n -E '(^|[[:space:]"(])/(Users|home|root|Volumes|tmp|opt|mnt|srv|etc|private|var|usr/local)/|(^|[^A-Za-z0-9])[A-Za-z]:[\\/]' -- 'knowledge-packs/*/releases/**'; then
+            echo "tracked release snapshot contains an absolute local path" >&2
+            exit 1
+          fi
