@@ -1,0 +1,44 @@
+{
+  "schema_version": "starunwiki.release-profile/v1",
+  "pack_id": "deep-sky",
+  "release_id": "public-de219d707e39",
+  "origin": "legacy-migration",
+  "digests": {
+    "corpus_sha256": "de219d707e39407357b05d40c21eed58450a21f92911bf0cf449898e6daa4375",
+    "original_manifest_sha256": "5ef927b252ee67300e4083972633bc6430fb7942f178412567f088f8db04e7de",
+    "assistant_sha256": "1c6cd4eae3388851b15adbac4c66918ba4e3c45297427b92bc06695ffa43b1f0",
+    "ui_sha256": "a57e051df7794917d6f70f462986d8a404bfe037d81d8797d5e07cbdd03ad25e",
+    "smoke_sha256": "8a7d7a67fedc02b48685e9a7c52434ced9275ede369e1825a98645ea80d8307a"
+  },
+  "public_profile": {
+    "brand": "StarunWiki",
+    "title": "深空知识问答",
+    "description": "搜索并读取当前批准的深空摄影 Wiki 页面，提供带原页引用的只读回答；证据不足时会明确说明。",
+    "suggestions": [
+      {
+        "category": "现场拍摄",
+        "title": "城市阳台首拍怎么开始？",
+        "question": "城市阳台第一次拍深空，应该先做什么？"
+      },
+      {
+        "category": "后期处理",
+        "title": "Siril 从原片到首图",
+        "question": "Siril 新手从原片到首图的流程是什么？"
+      }
+    ]
+  },
+  "smoke": {
+    "schema_version": "starunwiki.smoke-profile/v1",
+    "questions": [
+      {
+        "id": "city-balcony-first-light",
+        "query": "请先用 wiki_search 搜索城市阳台深空拍摄，再用 wiki_read_page 读取最相关页面，最后用一句话回答并引用该页。",
+        "required_tools": [
+          "wiki_search",
+          "wiki_read_page"
+        ],
+        "require_citation": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+schema_version: starunwiki.pack/v1
+id: deep-sky
+display_name: 深空天文拍摄
+locale: zh-CN
+
+content:
+  index: index.md
+  categories:
+    - path: 00-知识库规范
+      slug: governance
+    - path: 01-新人入门
+      slug: getting-started
+    - path: 02-器材百科
+      slug: equipment
+    - path: 03-拍摄SOP
+      slug: capture-sop
+    - path: 04-后期处理
+      slug: processing
+    - path: 05-目标图鉴
+      slug: targets
+    - path: 06-选址与环境
+      slug: observing-conditions
+    - path: 07-软件工具
+      slug: software
+    - path: 08-FAQ
+      slug: faq
+    - path: 09-踩坑与复盘
+      slug: lessons-learned
+  excluded:
+    - raw/**
+    - archive/**
+    - releases/**
+    - tools/**
+    - profile/**
+
+profile:
+  assistant: profile/assistant.md
+  ui: profile/ui.yaml
+  smoke: profile/smoke.yaml
+
+publication:
+  allowed_status:
+    - stable
+    - draft
+  required_access: public_candidate
+  require_human_verified: false
+  disclose_draft: true
+  disclose_unreviewed: true
+  active_release: releases/active.json

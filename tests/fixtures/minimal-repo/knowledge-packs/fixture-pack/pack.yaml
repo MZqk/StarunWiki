@@ -1,0 +1,25 @@
+schema_version: starunwiki.pack/v1
+id: fixture-pack
+display_name: Fixture Pack
+locale: zh-CN
+content:
+  index: index.md
+  categories:
+    - path: 00-docs
+      slug: docs
+  excluded:
+    - raw/**
+    - releases/**
+profile:
+  assistant: profile/assistant.md
+  ui: profile/ui.yaml
+  smoke: profile/smoke.yaml
+publication:
+  allowed_status:
+    - stable
+    - draft
+  required_access: public_candidate
+  require_human_verified: false
+  disclose_draft: true
+  disclose_unreviewed: true
+  active_release: releases/active.json

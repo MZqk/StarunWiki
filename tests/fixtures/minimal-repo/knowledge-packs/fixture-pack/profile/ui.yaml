@@ -1,0 +1,8 @@
+schema_version: starunwiki.ui-profile/v1
+brand: StarunWiki Fixture
+title: Fixture Q&A
+description: Deterministic fixture profile.
+suggestions:
+  - category: Fixture
+    title: Ask fixture
+    question: What is the fixture?

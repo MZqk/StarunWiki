@@ -1,0 +1,50 @@
+{
+  "schema_version": "starunwiki.authorization/v2",
+  "pack_id": "deep-sky",
+  "release_id": "public-de219d707e39",
+  "mode": "legacy-manifest-only",
+  "approved_by": null,
+  "approved_at": null,
+  "authorization_origin": "migrated-fixed-corpus-contract",
+  "original_authorization": {
+    "schema_version": 1,
+    "scope": "anonymous-public",
+    "authorization_mode": "fixed-corpus-snapshot",
+    "corpus_sha256": "de219d707e39407357b05d40c21eed58450a21f92911bf0cf449898e6daa4375",
+    "expected_page_count": 51,
+    "expected_unreviewed_count": 51,
+    "selector": "access == public_candidate AND status IN (stable, draft) AND content_withheld == false AND text != null",
+    "future_changes_automatically_authorized": false,
+    "draft_disclosure_required": true,
+    "unreviewed_disclosure_required": true,
+    "bundle_root": "."
+  },
+  "corpus": {
+    "path": null,
+    "sha256": "de219d707e39407357b05d40c21eed58450a21f92911bf0cf449898e6daa4375",
+    "available": false,
+    "rebuildable": false
+  },
+  "manifest": {
+    "path": "manifest.json",
+    "sha256": "b92eae7a94524ec8f6efde14929737a8eeac1e1ece0236d19bb49f0ea7aa1e73",
+    "original_sha256": "5ef927b252ee67300e4083972633bc6430fb7942f178412567f088f8db04e7de"
+  },
+  "profile": {
+    "path": "profile.json",
+    "sha256": "d134e25aef1bc9248746b28384cb9f3a5bcd79f4d1fbed61098898cad54c5b06"
+  },
+  "bundle_sha256": "af66d147d549f3e3d1d9eff0d6022b969286d786f07e1a7b9a0c76d414fcbaab",
+  "counts": {
+    "pages": 51,
+    "draft": 0,
+    "stable": 51,
+    "unreviewed": 51
+  },
+  "limitations": [
+    "cannot_rebuild_corpus",
+    "cannot_create_new_publication",
+    "cannot_claim_full_reproducibility"
+  ],
+  "future_changes_automatically_authorized": false
+}

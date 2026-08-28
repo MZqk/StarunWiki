@@ -1,0 +1,8 @@
+schema_version: starunwiki.smoke-profile/v1
+questions:
+  - id: city-balcony-first-light
+    query: 请先用 wiki_search 搜索城市阳台深空拍摄，再用 wiki_read_page 读取最相关页面，最后用一句话回答并引用该页。
+    required_tools:
+      - wiki_search
+      - wiki_read_page
+    require_citation: true

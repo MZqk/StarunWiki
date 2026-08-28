@@ -10,14 +10,39 @@ __pycache__/
 /integrations/*
 !/integrations/llm-wiki-public/
 
-# Third-party WeKnora checkout and its local SQLite worktree.
-services/
+# Third-party WeKnora checkout and its local SQLite worktree. Application code
+# under apps/ and deploy/ is source-controlled.
+/services/WeKnora/
+/services/WeKnora-sqlite-dev/
+
+# Canonical StarunWiki runtime state. Legacy v0.1 state remains ignored in its
+# original integration directory until an explicit, verified state migration.
+/.runtime/
+/.runtime.migrate-*/
+/integrations/llm-wiki-public/.env
+/integrations/llm-wiki-public/.secrets/
+/integrations/llm-wiki-public/.runtime/
+/integrations/llm-wiki-public/backups/
+/integrations/llm-wiki-public/output/
+/integrations/llm-wiki-public/release-state.json
+/integrations/llm-wiki-public/authorization/public-manifest.json
+/integrations/llm-wiki-public/.venv/
 
 # Working research outputs are not part of the published knowledge base.
 内容补充缺口调研-2026-08/
 archive/research/
+knowledge-packs/deep-sky/archive/research/
 
 # These text captures are restricted local evidence. Keep their public source
 # records, but never publish the captured website text to this public repo.
 raw/official-captures/
 raw/site-captures/
+knowledge-packs/deep-sky/raw/official-captures/
+knowledge-packs/deep-sky/raw/site-captures/
+
+# Local application build outputs.
+/apps/web/node_modules/
+/apps/web/dist/
+/apps/web/output/
+/apps/web/tsconfig.tsbuildinfo
+/apps/bff/llm-wiki-public-bff

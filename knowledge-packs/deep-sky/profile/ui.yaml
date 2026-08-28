@@ -1,0 +1,11 @@
+schema_version: starunwiki.ui-profile/v1
+brand: StarunWiki
+title: 深空知识问答
+description: 搜索并读取当前批准的深空摄影 Wiki 页面，提供带原页引用的只读回答；证据不足时会明确说明。
+suggestions:
+  - category: 现场拍摄
+    title: 城市阳台首拍怎么开始？
+    question: 城市阳台第一次拍深空，应该先做什么？
+  - category: 后期处理
+    title: Siril 从原片到首图
+    question: Siril 新手从原片到首图的流程是什么？

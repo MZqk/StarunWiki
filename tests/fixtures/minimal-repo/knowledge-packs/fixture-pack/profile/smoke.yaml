@@ -1,0 +1,8 @@
+schema_version: starunwiki.smoke-profile/v1
+questions:
+  - id: fixture
+    query: Search and read the fixture page.
+    required_tools:
+      - wiki_search
+      - wiki_read_page
+    require_citation: true
