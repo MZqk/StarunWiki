@@ -21,7 +21,6 @@ from .pack import KnowledgePack, load_pack, repository_root
 
 
 DEFAULT_PACK = load_pack("deep-sky")
-ROOT = DEFAULT_PACK.root  # v0.2 compatibility for callers that inspected ROOT.
 DEFAULT_OUTPUT = repository_root() / ".knowledge-catalog" / "retrieval-corpus.jsonl"
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)")
 REQUIRED_FIELDS = {

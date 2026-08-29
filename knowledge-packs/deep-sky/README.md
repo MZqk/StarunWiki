@@ -43,7 +43,7 @@ Markdown 阅读不需要安装依赖。采用器材参数、软件行为或安�
 ./manage.sh pack build deep-sky --output /tmp/deep-sky-candidate.jsonl
 ```
 
-兼容脚本 `scripts/build_knowledge_catalog.py` 在 `v0.2.x` 仍可用并输出弃用提示，计划于 `v0.3.0` 删除。
+从 `v0.3.0` 起不再提供旧 catalog wrapper；候选校验和构建统一使用仓库根目录的 `./manage.sh pack` 命令。
 
 领域权威资格审计位于 pack 内：
 

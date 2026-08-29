@@ -5,10 +5,9 @@
 __pycache__/
 *.py[cod]
 
-# The public Wiki Q&A implementation is source-controlled. Other integrations
-# remain local unless they are explicitly made part of this repository.
-/integrations/*
-!/integrations/llm-wiki-public/
+# Legacy integration state may remain locally during the rollback window, but
+# integrations are no longer a source-controlled application entry point.
+/integrations/
 
 # Third-party WeKnora checkout and its local SQLite worktree. Application code
 # under apps/ and deploy/ is source-controlled.
@@ -19,14 +18,6 @@ __pycache__/
 # original integration directory until an explicit, verified state migration.
 /.runtime/
 /.runtime.migrate-*/
-/integrations/llm-wiki-public/.env
-/integrations/llm-wiki-public/.secrets/
-/integrations/llm-wiki-public/.runtime/
-/integrations/llm-wiki-public/backups/
-/integrations/llm-wiki-public/output/
-/integrations/llm-wiki-public/release-state.json
-/integrations/llm-wiki-public/authorization/public-manifest.json
-/integrations/llm-wiki-public/.venv/
 
 # Working research outputs are not part of the published knowledge base.
 内容补充缺口调研-2026-08/

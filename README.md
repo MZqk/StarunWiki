@@ -28,7 +28,7 @@ knowledge pack -> approved release -> WeKnora Wiki-only -> BFF -> Web
 ./manage.sh test
 ```
 
-`v0.2.x` 暂时保留 `integrations/llm-wiki-public` 旧入口并输出弃用提示；它计划在 `v0.3.0` 删除。
+从 `v0.3.0` 起只保留仓库根目录的 `./manage.sh` 正式入口。旧 integration wrapper 和 catalog wrapper 已移除；遗留运行状态需通过 `./manage.sh state migrate` 迁往 `.runtime`。
 
 ## M0 发布边界
 

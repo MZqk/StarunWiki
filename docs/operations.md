@@ -1,6 +1,6 @@
-# StarunWiki v0.2 运行与迁移说明
+# StarunWiki v0.3 运行与迁移说明
 
-StarunWiki 是“Wiki 网页 AI 问答平台 + 可替换知识包”。本目录在 `v0.2.x` 只保留兼容入口；正式 CLI 是仓库根目录的 `./manage.sh`，本目录 wrapper 会输出弃用提示，并在 `v0.3.0` 删除。
+StarunWiki 是“Wiki 网页 AI 问答平台 + 可替换知识包”。从 `v0.3.0` 起，正式 CLI 只有仓库根目录的 `./manage.sh`；旧 integration wrapper 与 catalog wrapper 已删除。
 
 默认知识包是 `knowledge-packs/deep-sky`。Markdown/Git 是内容真相源，运行应用只消费已批准、版本化且完整性校验通过的 release。WeKnora、BFF 和浏览器都不得回写知识正文。
 
@@ -84,7 +84,7 @@ PUBLIC_ORIGIN=http://127.0.0.1:8090
 ./manage.sh bootstrap check --pack deep-sky     # 只读验证，不生成或覆盖 HMAC
 ```
 
-M0 只允许 `bootstrap check`。旧 wrapper 的 `./integrations/llm-wiki-public/manage.sh bootstrap` 也只转发到只读检查。
+M0 只允许 `bootstrap check`。
 
 ## 正式 CLI
 

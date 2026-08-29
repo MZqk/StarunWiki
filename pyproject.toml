@@ -1,6 +1,6 @@
 [project]
 name = "starunwiki"
-version = "0.2.0"
+version = "0.3.0"
 description = "Application-centric Wiki AI Q&A platform with versioned knowledge packs"
 requires-python = ">=3.11"
 dependencies = [

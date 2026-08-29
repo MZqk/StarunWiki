@@ -18,9 +18,7 @@ from .publisher import PublisherContext, bootstrap_check, bootstrap_init, check,
 from .release import (
     approve_pack,
     list_releases,
-    load_json,
     resolve_release_directory,
-    sha256_bytes,
     verify_release_directory,
 )
 from .state import StateRoot, migrate_legacy_state, resolve_state_root, state_report
@@ -78,27 +76,6 @@ def load_state_environment(state: StateRoot, *, include_runtime: bool) -> None:
         for key, value in _read_env_file(runtime_env).items():
             if key not in original:
                 os.environ[key] = value
-
-
-def verify_compatibility_corpus(release_dir: Path, corpus_path: Path) -> dict[str, object]:
-    """Read-only v0.1 `manifest --corpus` compatibility validation."""
-    path = corpus_path.expanduser()
-    if path.is_symlink() or not path.is_file():
-        raise StarunWikiError(f"无法读取兼容语料（必须是普通文件）：{path}")
-    try:
-        raw = path.read_bytes()
-        rows = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        raise StarunWikiError(f"无法读取兼容语料：{path}：{exc}") from exc
-    if any(not isinstance(row, dict) for row in rows):
-        raise StarunWikiError("兼容语料的每个 JSONL 记录必须是对象")
-    authorization = load_json(release_dir / "authorization.json")
-    corpus = authorization.get("corpus")
-    expected = str(corpus.get("sha256") or "") if isinstance(corpus, dict) else ""
-    actual = sha256_bytes(raw)
-    if not expected or actual != expected:
-        raise StarunWikiError(f"语料 SHA-256 漂移：want={expected or 'missing'} got={actual}")
-    return {"provided_corpus_sha256": actual, "provided_corpus_records": len(rows), "provided_corpus_verified": True}
 
 
 def validate_weknora_source(*, ensure: bool = False) -> Path:
@@ -199,11 +176,7 @@ def command_release(args: argparse.Namespace) -> None:
         return
     release_dir = resolve_release_directory(pack, args.release)
     if args.release_command == "verify":
-        verified = verify_release_directory(pack, release_dir)
-        corpus = getattr(args, "corpus", None)
-        if corpus:
-            verified = {**verified, **verify_compatibility_corpus(release_dir, Path(corpus))}
-        print_json(verified)
+        print_json(verify_release_directory(pack, release_dir))
         return
     context = PublisherContext(pack, release_dir, _state_from_args(args))
     if args.release_command == "plan":
@@ -304,7 +277,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="starunwiki")
     parser.add_argument("--version", action="version", version=f"StarunWiki {__version__}")
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("init", help="v0.2 兼容：准备配置与锁定依赖，不生成凭据")
+    commands.add_parser("init", help="准备配置与锁定依赖，不生成凭据")
     pack_parser = commands.add_parser("pack")
     pack_commands = pack_parser.add_subparsers(dest="pack_command", required=True)
     for name in ("validate", "build"):
@@ -322,7 +295,6 @@ def build_parser() -> argparse.ArgumentParser:
     child = release_commands.add_parser("list"); add_pack_option(child)
     for name in ("verify", "plan", "publish", "check"):
         child = release_commands.add_parser(name); add_release_options(child, state=name in {"plan", "publish", "check"})
-        child.add_argument("--corpus", help=argparse.SUPPRESS)
     runtime_parser = commands.add_parser("runtime")
     runtime_commands = runtime_parser.add_subparsers(dest="runtime_command", required=True)
     for name in ("infra", "start", "stop", "status", "logs", "config", "reload-model"):
@@ -332,7 +304,6 @@ def build_parser() -> argparse.ArgumentParser:
     bootstrap_commands = bootstrap_parser.add_subparsers(dest="bootstrap_command", required=True)
     for name in ("init", "check"):
         child = bootstrap_commands.add_parser(name); add_release_options(child, state=True)
-        child.add_argument("--corpus", help=argparse.SUPPRESS)
     state_parser = commands.add_parser("state")
     state_commands = state_parser.add_subparsers(dest="state_command", required=True)
     state_commands.add_parser("doctor"); state_commands.add_parser("migrate")

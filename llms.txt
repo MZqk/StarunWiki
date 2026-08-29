@@ -4,4 +4,3 @@
 - Default knowledge pack: knowledge-packs/deep-sky/index.md
 - Pack contract: knowledge-packs/deep-sky/pack.yaml
 - Operations and migration: docs/operations.md
-- v0.2 compatibility entry: integrations/llm-wiki-public/README.md

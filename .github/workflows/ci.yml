@@ -129,43 +129,6 @@ jobs:
               verify_release_directory(pack, release_dir)
           PY
 
-  compat-v1:
-    name: compat-v1
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-      - name: Sync locked Python environment
-        run: uv sync --frozen
-      - name: Validate shell wrappers
-        run: |
-          test -x manage.sh
-          test -x integrations/llm-wiki-public/manage.sh
-          test -x integrations/llm-wiki-public/run-native-weknora.sh
-          test -x deploy/weknora/run-native.sh
-          git ls-files --error-unmatch integrations/llm-wiki-public/run-native-weknora.sh
-          bash -n manage.sh
-          bash -n integrations/llm-wiki-public/manage.sh
-          bash -n integrations/llm-wiki-public/run-native-weknora.sh
-          bash -n deploy/weknora/run-native.sh
-      - name: Verify legacy manage entry forwards from another directory
-        run: |
-          root_help="$(./manage.sh --help)"
-          legacy_stderr="$(mktemp)"
-          legacy_help="$(cd "${RUNNER_TEMP}" && "${GITHUB_WORKSPACE}/integrations/llm-wiki-public/manage.sh" --help 2>"${legacy_stderr}")"
-          test "${legacy_help}" = "${root_help}"
-          grep -Eiq 'deprecated|deprecation|弃用' "${legacy_stderr}"
-      - name: Run compatibility tests when present
-        run: |
-          if [ -d tests/compatibility ]; then
-            uv run python -m unittest discover -s tests/compatibility -v
-          fi
-
   compose:
     name: compose
     runs-on: ubuntu-latest
